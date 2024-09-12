@@ -44,12 +44,14 @@ void generate_blogs() {
         printf("[DBG]: %s\n", article_path);
 
         Token tokens[100];
-        size_t tokens_len = parse_article(article_path, tokens);
-        for (size_t token = 0; token < tokens_len; ++token) {
-            printf("Got token with type (%d) and content '%s'\n",
-                    tokens[token].type, tokens[token].content);
+        size_t tokens_c = lex(article_path, tokens);
+        for (size_t token = 0; token < tokens_c; token++) {
+            printf(
+                "Got token (%d) with content '%s'\n",
+                tokens[token].type,
+                tokens[token].content
+            );
         }
-        printf("%s\n", entry->d_name);
     }
 
     // TODO: create coresponding html file

@@ -2,22 +2,11 @@
 #define LEXER_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
-typedef enum TokenType {
-    H1,
-    H2,
-    H3,
-    H4,
-    H5,
-    H6,
-    P
-} TokenType;
+#include "token.h"
 
-typedef struct Token {
-    TokenType type;
-    char content[100];
-} Token;
-
-size_t parse_article(const char *path, Token *data);
+size_t lex(const char *path, Token *tokens);
+void tokenize(const char *stream, size_t *tokens_c, Token *tokens);
 
 #endif // LEXER_H
