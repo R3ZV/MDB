@@ -5,7 +5,7 @@ dirs:
     @mkdir bin -p
 
 build: dirs
-    @{{CC}} {{FLAGS}} ./src/*.c -o ./bin/main
+    @{{CC}} {{FLAGS}} ./src/*.c -o ./bin/mdb
 
 run ARGS: build
     @./bin/main {{ARGS}}

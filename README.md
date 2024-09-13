@@ -23,17 +23,17 @@ to add more features in the future like *post description*, *published date* and
 ```
 
 # Usage
-You will need *Zig* installed to build the binary.
+You will need *just* installed to build the binary.
 ```console
 git clone git@github.com:R3ZV/MDB.git
 cd MDB
-zig build run
+just run
 ```
 
 The resulting binary can be either added to the PATH or if you
 have a 'bin' folder for your scripts you can add it there.
 
 ```console
-cp ./zig-out/bin/main ~/bin/mdb
+cp ./bin/mdb ~/bin/mdb
 mdb help
 ```
