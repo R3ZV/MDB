@@ -13,6 +13,9 @@ int main(void) {
     errs += test_fake_header_token();
     tests++;
 
+    errs += test_header_text_line_break();
+    tests++;
+
     printf("Tests passed: %d/%d\n", tests - errs, tests);
     return 0;
 }

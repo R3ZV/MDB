@@ -47,7 +47,8 @@ void generate_blogs() {
         size_t tokens_c = lex(article_path, tokens);
         for (size_t token = 0; token < tokens_c; token++) {
             printf(
-                "Got token (%d) with content '%s'\n",
+                "Token [%zu] has type (%d) with content '%s'\n",
+                token,
                 tokens[token].type,
                 tokens[token].content
             );

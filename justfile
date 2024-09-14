@@ -8,7 +8,7 @@ build: dirs
     @{{CC}} {{FLAGS}} ./src/*.c -o ./bin/mdb
 
 run ARGS: build
-    @./bin/main {{ARGS}}
+    @./bin/mdb {{ARGS}}
 
 
 src_files := "`eza ./src/*.c | grep -v main.c`"
