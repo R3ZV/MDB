@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-
 #include "lexer.h"
 
 void tokenize(const char *stream, size_t *tokens_c, Token *tokens) {

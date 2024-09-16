@@ -2,6 +2,8 @@
 #define LEXER_H
 
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 #include <stdbool.h>
 
 #include "token.h"

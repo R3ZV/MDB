@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 
 #include "lexer.h"
+#include "html.h"
 
 void cli_help() {
     printf("Usage: cli [command]\n");
@@ -26,6 +27,7 @@ void generate_blogs() {
         mkdir("blogs", 0700);
     }
 
+    uint32_t succ_blogs = 0, blogs_c = 0;
     for (struct dirent *entry = readdir(dp); entry != NULL; entry = readdir(dp)) {
         if (strlen(entry->d_name) <= 3) {
             printf("[WARN]: Invalid file '%s'\n", entry->d_name);
@@ -39,12 +41,15 @@ void generate_blogs() {
             continue;
         }
 
+        blogs_c++;
+
         char article_path[strlen(entry->d_name) + strlen("./articles/")]; 
         sprintf(article_path, "./articles/%s", entry->d_name);
         printf("[DBG]: %s\n", article_path);
 
         Token tokens[100];
         size_t tokens_c = lex(article_path, tokens);
+
         for (size_t token = 0; token < tokens_c; token++) {
             printf(
                 "Token [%zu] has type (%d) with content '%s'\n",
@@ -53,10 +58,23 @@ void generate_blogs() {
                 tokens[token].content
             );
         }
+
+        char f_name[128];
+        strncpy(f_name, entry->d_name, strlen(entry->d_name) - 3);
+
+        if (!parse_into_html(tokens_c, tokens, f_name)) {
+            printf("[ERROR]: Couldn't parse the tokens into a HTML file\n");
+            continue;
+        }
+
+        if (!update_blog_links(f_name)) {
+            printf("[ERROR]: Something went wrong while trying to update the blog file\n");
+            continue;
+        }
+        succ_blogs++;
     }
 
-    // TODO: create coresponding html file
-    // TODO: update blog.html with links to each blog post
+    printf("Generated and upated: %d/%d blogs\n", succ_blogs, blogs_c);
 
     closedir(dp);
 }
