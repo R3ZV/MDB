@@ -1,10 +1,15 @@
 #include "html.h"
 
-#define html_elm(buff, tag, content) sprintf(buff, "<%s>%s</%s>", tag, content, tag)
+#define html_elm(buff, tag, props, content) sprintf(buff, "<%s %s>%s</%s>", tag, props, content, tag)
 
-bool create_html(const size_t content_c, char *const content[], const char *f_name) {
+bool create_html(
+    const size_t content_c,
+    char *const content[],
+    const char *f_name,
+    const char *f_path)
+{
     char path[128];
-    sprintf(path, "./blogs/%s.html", f_name);
+    sprintf(path, "%s/%s.html", f_path, f_name);
 
     FILE *fp = fopen(path, "wb");
     if (fp == NULL) {
@@ -40,7 +45,7 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
                            there should be a TEXT TOKEN");
                     return false;
                 }
-                html_elm(html_content[html_i++], "h1", tokens[i + 1].content);
+                html_elm(html_content[html_i++], "h1", "", tokens[i + 1].content);
                 i++;
                 break;
 
@@ -50,7 +55,7 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
                            there should be a TEXT TOKEN");
                     return false;
                 }
-                html_elm(html_content[html_i++], "h2", tokens[i + 1].content);
+                html_elm(html_content[html_i++], "h2", "", tokens[i + 1].content);
                 i++;
                 break;
 
@@ -60,7 +65,7 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
                            there should be a TEXT TOKEN");
                     return false;
                 }
-                html_elm(html_content[html_i++], "h3", tokens[i + 1].content);
+                html_elm(html_content[html_i++], "h3", "", tokens[i + 1].content);
                 i++;
                 break;
 
@@ -70,7 +75,7 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
                            there should be a TEXT TOKEN");
                     return false;
                 }
-                html_elm(html_content[html_i++], "h4", tokens[i + 1].content);
+                html_elm(html_content[html_i++], "h4", "", tokens[i + 1].content);
                 i++;
                 break;
 
@@ -80,7 +85,7 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
                            there should be a TEXT TOKEN");
                     return false;
                 }
-                html_elm(html_content[html_i++], "h5", tokens[i + 1].content);
+                html_elm(html_content[html_i++], "h5", "", tokens[i + 1].content);
                 i++;
                 break;
 
@@ -90,12 +95,12 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
                            there should be a TEXT TOKEN");
                     return false;
                 }
-                html_elm(html_content[html_i++], "h6", tokens[i + 1].content);
+                html_elm(html_content[html_i++], "h6", "", tokens[i + 1].content);
                 i++;
                 break;
 
             case TEXT:
-                html_elm(html_content[html_i++], "p", tokens[i].content);
+                html_elm(html_content[html_i++], "p", "", tokens[i].content);
                 break;
 
             case LINE_BREAK:
@@ -105,10 +110,25 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
     }
 
     strcpy(html_content[html_i++], "<html>");
-    return create_html(html_i, html_content, f_name);
+    return create_html(html_i, html_content, f_name, "./blogs");
 }
 
-// TODO:
-bool update_blog_links(const char *f_name) {
-    return true;
+bool update_blog_links(const size_t blogs_c, const char **blogs_name) {
+    char *html_content[128];
+    for (size_t i = 0; i < 128; i++) {
+        html_content[i] = (char *) malloc(100 * sizeof(char));
+    }
+
+    html_content[0] = "<html>";
+    size_t html_c = 1;
+
+    for (size_t i = 0; i < blogs_c; i++) {
+        char blog_link[128];
+        sprintf(blog_link, "href=\"./blogs/%s.html\"", blogs_name[i]);
+
+        html_elm(html_content[html_c++], "a", blog_link, blogs_name[i]);
+    }
+
+    html_content[html_c++] = "<html>";
+    return create_html(html_c, html_content, "blog", ".");
 }

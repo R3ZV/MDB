@@ -27,7 +27,13 @@ void generate_blogs() {
         mkdir("blogs", 0700);
     }
 
-    uint32_t succ_blogs = 0, blogs_c = 0;
+    const char *blogs_name[128];
+    for (size_t i = 0; i < 128; i++) {
+        blogs_name[i] = (char *) malloc(10 * sizeof(char));
+    }
+
+    size_t succ_blogs = 0;
+    uint32_t blogs_c = 0;
     for (struct dirent *entry = readdir(dp); entry != NULL; entry = readdir(dp)) {
         if (strlen(entry->d_name) <= 3) {
             printf("[WARN]: Invalid file '%s'\n", entry->d_name);
@@ -67,14 +73,14 @@ void generate_blogs() {
             continue;
         }
 
-        if (!update_blog_links(f_name)) {
-            printf("[ERROR]: Something went wrong while trying to update the blog file\n");
-            continue;
-        }
-        succ_blogs++;
+        blogs_name[succ_blogs++] = f_name;
     }
 
-    printf("Generated and upated: %d/%d blogs\n", succ_blogs, blogs_c);
+    if (update_blog_links(succ_blogs, blogs_name)) {
+        printf("Generated and upated: %zu/%d blogs\n", succ_blogs, blogs_c);
+    } else {
+        printf("[ERROR]: Something went wrong while trying to update the blog file\n");
+    }
 
     closedir(dp);
 }

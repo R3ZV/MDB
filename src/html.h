@@ -10,7 +10,7 @@
 #include "token.h"
 
 bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_name);
-bool update_blog_links(const char *f_name);
+bool update_blog_links(const size_t blogs_c, const char **blogs_name);
 
 
 #endif // HTML_h
