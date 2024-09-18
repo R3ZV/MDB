@@ -27,7 +27,7 @@ void generate_blogs() {
         mkdir("blogs", 0700);
     }
 
-    const char *blogs_name[128];
+    char *blogs_name[128];
     for (size_t i = 0; i < 128; i++) {
         blogs_name[i] = (char *) malloc(10 * sizeof(char));
     }
@@ -51,14 +51,14 @@ void generate_blogs() {
 
         char article_path[strlen(entry->d_name) + strlen("./articles/")]; 
         sprintf(article_path, "./articles/%s", entry->d_name);
-        printf("[DBG]: %s\n", article_path);
+        printf("[DBG] Lexing: %s\n", article_path);
 
         Token tokens[100];
         size_t tokens_c = lex(article_path, tokens);
 
         for (size_t token = 0; token < tokens_c; token++) {
             printf(
-                "Token [%zu] has type (%d) with content '%s'\n",
+                "[DBG]: Token [%zu] has type (%d) with content '%s'\n",
                 token,
                 tokens[token].type,
                 tokens[token].content
@@ -73,13 +73,17 @@ void generate_blogs() {
             continue;
         }
 
-        blogs_name[succ_blogs++] = f_name;
+        strcpy(blogs_name[succ_blogs++], f_name);
     }
 
     if (update_blog_links(succ_blogs, blogs_name)) {
-        printf("Generated and upated: %zu/%d blogs\n", succ_blogs, blogs_c);
+        printf("Generated: %zu/%d blogs.\n", succ_blogs, blogs_c);
     } else {
         printf("[ERROR]: Something went wrong while trying to update the blog file\n");
+    }
+
+    for (size_t i = 0; i < 128; i++) {
+        free(blogs_name[i]);
     }
 
     closedir(dp);

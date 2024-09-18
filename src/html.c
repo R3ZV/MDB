@@ -1,6 +1,6 @@
 #include "html.h"
 
-#define html_elm(buff, tag, props, content) sprintf(buff, "<%s %s>%s</%s>", tag, props, content, tag)
+#define html_elm(buff, tag, props, content) sprintf(buff, "<%s%s>%s</%s>", tag, props, content, tag)
 
 bool create_html(
     const size_t content_c,
@@ -34,7 +34,7 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
         html_content[i] = (char *) malloc(100 * sizeof(char));
     }
 
-    html_content[0] = "<html>";
+    strcpy(html_content[0], "<html>");
 
     size_t html_i = 1;
     for (size_t i = 0; i < tokens_c; i++) {
@@ -110,25 +110,36 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
     }
 
     strcpy(html_content[html_i++], "<html>");
-    return create_html(html_i, html_content, f_name, "./blogs");
+    bool result = create_html(html_i, html_content, f_name, "./blogs");
+
+    for (size_t i = 0; i < 128; i++) {
+        free(html_content[i]);
+    }
+
+    return result;
 }
 
-bool update_blog_links(const size_t blogs_c, const char **blogs_name) {
+bool update_blog_links(const size_t blogs_c, char **const blogs_name) {
     char *html_content[128];
     for (size_t i = 0; i < 128; i++) {
         html_content[i] = (char *) malloc(100 * sizeof(char));
     }
 
-    html_content[0] = "<html>";
+    strcpy(html_content[0], "<html>");
     size_t html_c = 1;
 
     for (size_t i = 0; i < blogs_c; i++) {
         char blog_link[128];
-        sprintf(blog_link, "href=\"./blogs/%s.html\"", blogs_name[i]);
+        sprintf(blog_link, " href=\"./blogs/%s.html\"", blogs_name[i]);
 
         html_elm(html_content[html_c++], "a", blog_link, blogs_name[i]);
     }
 
-    html_content[html_c++] = "<html>";
-    return create_html(html_c, html_content, "blog", ".");
+    strcpy(html_content[html_c++], "<html>");
+    bool result = create_html(html_c, html_content, "blog", ".");
+
+    for (size_t i = 0; i < 128; i++) {
+        free(html_content[i]);
+    }
+    return result;
 }
