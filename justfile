@@ -4,12 +4,11 @@ FLAGS := "-Wall -Wextra"
 dirs:
     @mkdir bin -p
 
-build: dirs
-    @{{CC}} {{FLAGS}} ./src/*.c -o ./bin/mdb
+build dbg="": dirs
+    @{{CC}} {{FLAGS}} {{ if dbg == "dbg" { "-DDEBUG" } else { "" } }} ./src/*.c -o ./bin/mdb
 
 run ARGS: build
     @./bin/mdb {{ARGS}}
-
 
 src_files := "`eza ./src/*.c | grep -v main.c`"
 test: dirs

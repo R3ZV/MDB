@@ -29,78 +29,39 @@ bool create_html(
 }
 
 bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_name) {
-    char *html_content[128];
-    for (size_t i = 0; i < 128; i++) {
+    const size_t MAX_HTML_ELEMENTS = 128;
+    char *html_content[MAX_HTML_ELEMENTS];
+    for (size_t i = 0; i < MAX_HTML_ELEMENTS; i++) {
         html_content[i] = (char *) malloc(100 * sizeof(char));
     }
 
     strcpy(html_content[0], "<html>");
 
-    size_t html_i = 1;
+    size_t html_c = 1;
     for (size_t i = 0; i < tokens_c; i++) {
         switch(tokens[i].type) {
             case H1:
-                if (i + 1 < tokens_c && tokens[i + 1].type != TEXT) {
-                    printf("[ERROR]: Invalid token, after an H1 token \
-                           there should be a TEXT TOKEN");
-                    return false;
-                }
-                html_elm(html_content[html_i++], "h1", "", tokens[i + 1].content);
-                i++;
-                break;
-
             case H2:
-                if (i + 1 < tokens_c && tokens[i + 1].type != TEXT) {
-                    printf("[ERROR]: Invalid token, after an H2 token \
-                           there should be a TEXT TOKEN");
-                    return false;
-                }
-                html_elm(html_content[html_i++], "h2", "", tokens[i + 1].content);
-                i++;
-                break;
-
             case H3:
-                if (i + 1 < tokens_c && tokens[i + 1].type != TEXT) {
-                    printf("[ERROR]: Invalid token, after an H3 token \
-                           there should be a TEXT TOKEN");
-                    return false;
-                }
-                html_elm(html_content[html_i++], "h3", "", tokens[i + 1].content);
-                i++;
-                break;
-
             case H4:
-                if (i + 1 < tokens_c && tokens[i + 1].type != TEXT) {
-                    printf("[ERROR]: Invalid token, after an H4 token \
-                           there should be a TEXT TOKEN");
-                    return false;
-                }
-                html_elm(html_content[html_i++], "h4", "", tokens[i + 1].content);
-                i++;
-                break;
-
             case H5:
+            case H6: {
+                // WARN: this assumes that the first 6 elements of the TokenType
+                // enum are the 6 headers in this order H1, H2, H3, H4, H5, H6
+                char tag[5];
+                sprintf(tag, "h%d", tokens[i].type + 1);
                 if (i + 1 < tokens_c && tokens[i + 1].type != TEXT) {
-                    printf("[ERROR]: Invalid token, after an H5 token \
-                           there should be a TEXT TOKEN");
+                    printf("[ERROR]: Invalid token, after an %s token \
+                           there should be a TEXT TOKEN", tag);
                     return false;
                 }
-                html_elm(html_content[html_i++], "h5", "", tokens[i + 1].content);
+                html_elm(html_content[html_c++], tag, "", tokens[i + 1].content);
                 i++;
                 break;
-
-            case H6:
-                if (i + 1 < tokens_c && tokens[i + 1].type != TEXT) {
-                    printf("[ERROR]: Invalid token, after an H6 token \
-                           there should be a TEXT TOKEN");
-                    return false;
-                }
-                html_elm(html_content[html_i++], "h6", "", tokens[i + 1].content);
-                i++;
-                break;
+            }
 
             case TEXT:
-                html_elm(html_content[html_i++], "p", "", tokens[i].content);
+                html_elm(html_content[html_c++], "p", "", tokens[i].content);
                 break;
 
             case LINE_BREAK:
@@ -109,10 +70,10 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
         }
     }
 
-    strcpy(html_content[html_i++], "<html>");
-    bool result = create_html(html_i, html_content, f_name, "./blogs");
+    strcpy(html_content[html_c++], "<html>");
+    bool result = create_html(html_c, html_content, f_name, "./blogs");
 
-    for (size_t i = 0; i < 128; i++) {
+    for (size_t i = 0; i < MAX_HTML_ELEMENTS; i++) {
         free(html_content[i]);
     }
 
@@ -120,8 +81,9 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
 }
 
 bool update_blog_links(const size_t blogs_c, char **const blogs_name) {
-    char *html_content[128];
-    for (size_t i = 0; i < 128; i++) {
+    const size_t MAX_HTML_ELEMENTS = 128;
+    char *html_content[MAX_HTML_ELEMENTS];
+    for (size_t i = 0; i < MAX_HTML_ELEMENTS; i++) {
         html_content[i] = (char *) malloc(100 * sizeof(char));
     }
 
@@ -129,7 +91,7 @@ bool update_blog_links(const size_t blogs_c, char **const blogs_name) {
     size_t html_c = 1;
 
     for (size_t i = 0; i < blogs_c; i++) {
-        char blog_link[128];
+        char blog_link[64];
         sprintf(blog_link, " href=\"./blogs/%s.html\"", blogs_name[i]);
 
         html_elm(html_content[html_c++], "a", blog_link, blogs_name[i]);
@@ -138,8 +100,9 @@ bool update_blog_links(const size_t blogs_c, char **const blogs_name) {
     strcpy(html_content[html_c++], "<html>");
     bool result = create_html(html_c, html_content, "blog", ".");
 
-    for (size_t i = 0; i < 128; i++) {
+    for (size_t i = 0; i < MAX_HTML_ELEMENTS; i++) {
         free(html_content[i]);
     }
+
     return result;
 }

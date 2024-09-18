@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <sys/stat.h>
 
+#include "debug.h"
 #include "lexer.h"
 #include "html.h"
 
@@ -51,14 +52,14 @@ void generate_blogs() {
 
         char article_path[strlen(entry->d_name) + strlen("./articles/")]; 
         sprintf(article_path, "./articles/%s", entry->d_name);
-        printf("[DBG] Lexing: %s\n", article_path);
+        dbg("Lexing: %s\n", article_path);
 
         Token tokens[100];
         size_t tokens_c = lex(article_path, tokens);
 
+        dbg("Got %zu tokens:\n", tokens_c);
         for (size_t token = 0; token < tokens_c; token++) {
-            printf(
-                "[DBG]: Token [%zu] has type (%d) with content '%s'\n",
+            dbg("Token [%zu] has type (%d) with content '%s'\n",
                 token,
                 tokens[token].type,
                 tokens[token].content
