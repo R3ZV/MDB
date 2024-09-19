@@ -2,6 +2,26 @@
 
 #define html_elm(buff, tag, props, content) sprintf(buff, "<%s%s>%s</%s>", tag, props, content, tag)
 
+size_t html_template(char **html_content, const char *f_name) {
+    size_t html_c = 0;
+    strcpy(html_content[html_c++], "<!DOCTYPE html>");
+    strcpy(html_content[html_c++], "<html lang=\"en\">");
+
+    strcpy(html_content[html_c++], "<head>");
+    strcpy(html_content[html_c++], "<meta charset=\"utf-8\">");
+    strcpy(html_content[html_c++], "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+    html_elm(html_content[html_c++], "title", "", "Blog");
+
+    char css_src[64];
+    sprintf(css_src, "<link rel=\"stylesheet\" href=\"%s.css\">", f_name);
+    strcpy(html_content[html_c++], css_src);
+
+    strcpy(html_content[html_c++], "</head>");
+    strcpy(html_content[html_c++], "<body>");
+
+    return html_c;
+}
+
 bool create_html(
     const size_t content_c,
     char *const content[],
@@ -29,15 +49,13 @@ bool create_html(
 }
 
 bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_name) {
-    const size_t MAX_HTML_ELEMENTS = 128;
+    const size_t MAX_HTML_ELEMENTS = 256;
     char *html_content[MAX_HTML_ELEMENTS];
     for (size_t i = 0; i < MAX_HTML_ELEMENTS; i++) {
-        html_content[i] = (char *) malloc(100 * sizeof(char));
+        html_content[i] = (char *) malloc(256 * sizeof(char));
     }
 
-    strcpy(html_content[0], "<html>");
-
-    size_t html_c = 1;
+    size_t html_c = html_template(html_content, f_name);
     for (size_t i = 0; i < tokens_c; i++) {
         switch(tokens[i].type) {
             case H1:
@@ -70,7 +88,8 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
         }
     }
 
-    strcpy(html_content[html_c++], "<html>");
+    strcpy(html_content[html_c++], "</body>");
+    strcpy(html_content[html_c++], "</html>");
     bool result = create_html(html_c, html_content, f_name, "./blogs");
 
     for (size_t i = 0; i < MAX_HTML_ELEMENTS; i++) {
@@ -81,15 +100,13 @@ bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_n
 }
 
 bool update_blog_links(const size_t blogs_c, char **const blogs_name) {
-    const size_t MAX_HTML_ELEMENTS = 128;
+    const size_t MAX_HTML_ELEMENTS = 256;
     char *html_content[MAX_HTML_ELEMENTS];
     for (size_t i = 0; i < MAX_HTML_ELEMENTS; i++) {
-        html_content[i] = (char *) malloc(100 * sizeof(char));
+        html_content[i] = (char *) malloc(256 * sizeof(char));
     }
 
-    strcpy(html_content[0], "<html>");
-    size_t html_c = 1;
-
+    size_t html_c = html_template(html_content, "blogs");
     for (size_t i = 0; i < blogs_c; i++) {
         char blog_link[64];
         sprintf(blog_link, " href=\"./blogs/%s.html\"", blogs_name[i]);
@@ -97,7 +114,8 @@ bool update_blog_links(const size_t blogs_c, char **const blogs_name) {
         html_elm(html_content[html_c++], "a", blog_link, blogs_name[i]);
     }
 
-    strcpy(html_content[html_c++], "<html>");
+    strcpy(html_content[html_c++], "</body>");
+    strcpy(html_content[html_c++], "</html>");
     bool result = create_html(html_c, html_content, "blog", ".");
 
     for (size_t i = 0; i < MAX_HTML_ELEMENTS; i++) {
