@@ -49,7 +49,6 @@ void generate_blogs() {
 
         char article_path[strlen(entry->d_name) + strlen("./articles/")];
         sprintf(article_path, "./articles/%s", entry->d_name);
-        dbg("Lexing: %s\n", article_path);
 
         Token tokens[256];
         size_t tokens_c = lex(article_path, tokens);

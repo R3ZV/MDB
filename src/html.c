@@ -1,6 +1,33 @@
 #include "html.h"
 
-#define html_elm(buff, tag, props, content) sprintf(buff, "<%s%s>%s</%s>", tag, props, content, tag)
+void html_elm(
+    char *const buff,
+    const char *const tag,
+    const char *const props,
+    const char *const content)
+{
+
+    if (buff == NULL) {
+        printf("[ERROR]: Null (buffer) pointer for HTML element\n");
+        exit(1);
+    }
+
+    if (tag == NULL) {
+        printf("[ERROR]: Null (tag) pointer for HTML element\n");
+        exit(1);
+    }
+
+    if (props == NULL) {
+        printf("[ERROR]: Null (props) pointer for HTML element\n");
+        exit(1);
+    }
+
+    if (content == NULL) {
+        printf("[ERROR]: Null (content) pointer for HTML element\n");
+        exit(1);
+    }
+    sprintf(buff, "<%s%s>%s</%s>", tag, props, content, tag);
+}
 
 typedef struct HtmlFile {
     char *name;
@@ -13,17 +40,31 @@ typedef struct HtmlFile {
 
 HtmlFile InitHtmlFile() {
     HtmlFile file;
-    file.name = (char *) malloc(64 * sizeof(char));
-    strcpy(file.name, "");
+    file.name = calloc(64, sizeof(char));
+    if (file.name == NULL) {
+        printf("[ERROR]: Couldn't allocate enough memmory for an html file name\n");
+        exit(1);
+    }
 
-    file.path = (char *) malloc(64 * sizeof(char));
-    strcpy(file.path, "");
+    file.path = calloc(64, sizeof(char));
+    if (file.path == NULL) {
+        printf("[ERROR]: Couldn't allocate enough memmory for an html file path\n");
+        exit(1);
+    }
 
     file.content_c = 0;
-    file.content = malloc(256 * sizeof(char *));
+    file.content = calloc(256, sizeof(char *));
+    if (file.content == NULL) {
+        printf("[ERROR]: Couldn't allocate enough memmory for an html file content\n");
+        exit(1);
+    }
+
     for (size_t i = 0; i < 256; i++) {
-        file.content[i] = (char *) malloc(256 * sizeof(char));
-        strcpy(file.content[i], "");
+        file.content[i] = calloc(1024, sizeof(char));
+        if (file.content == NULL) {
+            printf("[ERROR]: Couldn't allocate enough memmory for an html file content value\n");
+            exit(1);
+        }
     }
 
     return file;
@@ -53,7 +94,6 @@ size_t html_template(char **content, const char *file_name) {
     html_elm(content[i++], "title", "", "Blog");
 
     char css_src[64];
-    dbg("Css file name: %s\n", file_name);
     sprintf(css_src, "<link rel=\"stylesheet\" href=\"styles/%s.css\">", file_name);
     strcpy(content[i++], css_src);
     strcpy(content[i++], "</head>");
@@ -64,20 +104,21 @@ size_t html_template(char **content, const char *file_name) {
 /// strcopy copyes byte by byte the `src` content
 /// into `dest` but starting from `dist_i`.
 ///
-/// The user has to check that dset_i + strlen(src) < sizeof(dest) / sizeof(char)
+/// The user has to check that dest_i + strlen(src) + 1 < sizeof(dest) / sizeof(char)
+/// +1 comes from having to add '\0' at the end of the string.
 size_t strcopy(char *dest, const size_t dest_i, const char *const src) {
     for (size_t i = 0; i < strlen(src); i++) {
         dest[dest_i + i] = src[i];
     }
+    dest[dest_i + strlen(src)] = '\0';
     return strlen(src);
 }
 
 bool create_html(const HtmlFile *const file) {
+    dbg("Creating html file with name: %s\n", file->name);
     char path[128];
     sprintf(path, "%s/%s.html", file->path, file->name);
 
-    dbg("Html path: %s\n", file->path);
-    dbg("Html path file name: %s\n", file->name);
     FILE *fp = fopen(path, "wb");
     if (fp == NULL) {
         printf("[ERROR]: couldn't open %s\n", file->path);
@@ -85,12 +126,14 @@ bool create_html(const HtmlFile *const file) {
     }
 
     for (size_t i = 0; i < file->content_c; i++) {
-        fwrite(file->content[i], sizeof(char), strlen(file->content[i]), fp);
+        dbg("Writing line %zu of html file with content: %s\n", i, file->content[i]);
+        wrote = fwrite(file->content[i], sizeof(char), strlen(file->content[i]), fp);
         if (i + 1 < file->content_c) {
             fwrite("\n", sizeof(char), strlen("\n"), fp);
         }
     }
 
+    dbg("Html file [%s] created!\n", file->name);
     fclose(fp);
     return true;
 }
@@ -137,7 +180,7 @@ BlogPost parse_into_html(const size_t tokens_c, const Token *const tokens, const
             }
 
             case TEXT:
-                if (content_buffer_c + strlen(tokens[i].content) >= sizeof(content_buffer) / sizeof(char)) {
+                if (content_buffer_c + strlen(tokens[i].content) + 1 >= sizeof(content_buffer) / sizeof(char)) {
                     printf("[ERROR]: Content buffer is smaller then the content it needs to hold\n");
                     exit(1);
                 }
@@ -151,7 +194,6 @@ BlogPost parse_into_html(const size_t tokens_c, const Token *const tokens, const
                 if (strlen(post.description) == 0) {
                     strcpy(post.description, content_buffer);
                 }
-
                 html_elm(file.content[file.content_c++], "p", "", content_buffer);
                 memset(content_buffer, 0, 1024);
                 content_buffer_c = 0;
@@ -174,6 +216,7 @@ BlogPost parse_into_html(const size_t tokens_c, const Token *const tokens, const
 }
 
 bool update_blog_links(const size_t blogs_c, const BlogPost *const posts) {
+    dbg("Updating blog links...\n", "");
     HtmlFile file = InitHtmlFile();
     strcpy(file.name, "blog");
     strcpy(file.path, "./");
