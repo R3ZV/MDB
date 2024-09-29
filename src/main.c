@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "lexer.h"
 #include "html.h"
+#include "blog.h"
 
 void cli_help() {
     printf("Usage: cli [command]\n");
@@ -28,12 +29,8 @@ void generate_blogs() {
         mkdir("blogs", 0700);
     }
 
-    char *blogs_name[128];
-    for (size_t i = 0; i < 128; i++) {
-        blogs_name[i] = (char *) malloc(10 * sizeof(char));
-    }
-
     size_t succ_blogs = 0;
+    BlogPost blogs[1024];
     uint32_t blogs_c = 0;
     for (struct dirent *entry = readdir(dp); entry != NULL; entry = readdir(dp)) {
         if (strlen(entry->d_name) <= 3) {
@@ -50,11 +47,11 @@ void generate_blogs() {
 
         blogs_c++;
 
-        char article_path[strlen(entry->d_name) + strlen("./articles/")]; 
+        char article_path[strlen(entry->d_name) + strlen("./articles/")];
         sprintf(article_path, "./articles/%s", entry->d_name);
         dbg("Lexing: %s\n", article_path);
 
-        Token tokens[100];
+        Token tokens[256];
         size_t tokens_c = lex(article_path, tokens);
 
         dbg("Got %zu tokens:\n", tokens_c);
@@ -69,22 +66,23 @@ void generate_blogs() {
         char f_name[128];
         strncpy(f_name, entry->d_name, strlen(entry->d_name) - 3);
 
-        if (!parse_into_html(tokens_c, tokens, f_name)) {
+        BlogPost new_post = parse_into_html(tokens_c, tokens, f_name);
+        if (new_post.created == false) {
+            FreeBlogPost(&new_post);
             printf("[ERROR]: Couldn't parse the tokens into a HTML file\n");
             continue;
         }
-
-        strcpy(blogs_name[succ_blogs++], f_name);
+        blogs[succ_blogs++] = new_post;
     }
 
-    if (update_blog_links(succ_blogs, blogs_name)) {
+    if (update_blog_links(succ_blogs, blogs)) {
         printf("Generated: %zu/%d blogs.\n", succ_blogs, blogs_c);
     } else {
         printf("[ERROR]: Something went wrong while trying to update the blog file\n");
     }
 
-    for (size_t i = 0; i < 128; i++) {
-        free(blogs_name[i]);
+    for (size_t i = 0; i < succ_blogs; i++) {
+        FreeBlogPost(&blogs[i]);
     }
 
     closedir(dp);

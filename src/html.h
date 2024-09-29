@@ -8,9 +8,10 @@
 #include <stdint.h>
 
 #include "token.h"
+#include "blog.h"
+#include "debug.h"
 
-bool parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_name);
-bool update_blog_links(const size_t blogs_c, char **const blogs_name);
-
+BlogPost parse_into_html(const size_t tokens_c, const Token *tokens, const char *f_name);
+bool update_blog_links(const size_t blogs_c, const BlogPost *const posts);
 
 #endif // HTML_H
