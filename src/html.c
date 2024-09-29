@@ -127,7 +127,7 @@ bool create_html(const HtmlFile *const file) {
 
     for (size_t i = 0; i < file->content_c; i++) {
         dbg("Writing line %zu of html file with content: %s\n", i, file->content[i]);
-        wrote = fwrite(file->content[i], sizeof(char), strlen(file->content[i]), fp);
+        fwrite(file->content[i], sizeof(char), strlen(file->content[i]), fp);
         if (i + 1 < file->content_c) {
             fwrite("\n", sizeof(char), strlen("\n"), fp);
         }
