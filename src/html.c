@@ -94,10 +94,15 @@ size_t html_template(char **content, const char *file_name) {
     html_elm(content[i++], "title", "", "Blog");
 
     char css_src[64];
-    sprintf(css_src, "<link rel=\"stylesheet\" href=\"styles/%s.css\">", file_name);
+    sprintf(css_src, "<link rel=\"stylesheet\" href=\"../styles/%s.css\">", file_name);
     strcpy(content[i++], css_src);
+    strcpy(content[i++], "<link rel=\"stylesheet\" href=\"../styles/styles.css\">");
+    if (strcmp(file_name, "blog") != 0) {
+        strcpy(content[i++], "<link rel=\"stylesheet\" href=\"../styles/post.css\">");
+    }
     strcpy(content[i++], "</head>");
     strcpy(content[i++], "<body>");
+    strcpy(content[i++], "<main>");
     return i;
 }
 
@@ -147,6 +152,7 @@ BlogPost parse_into_html(const size_t tokens_c, const Token *const tokens, const
     strcpy(post.name, f_name);
 
     file.content_c += html_template(file.content, file.name);
+    html_elm(file.content[file.content_c++], "a", " href=\"./blog.html\"", "<- Back");
 
     char content_buffer[1024];
     memset(content_buffer, 0, 1024);
@@ -204,6 +210,7 @@ BlogPost parse_into_html(const size_t tokens_c, const Token *const tokens, const
                 break;
         }
     }
+    strcpy(file.content[file.content_c++], "</main>");
     strcpy(file.content[file.content_c++], "</body>");
     strcpy(file.content[file.content_c++], "</html>");
 
@@ -219,21 +226,23 @@ bool update_blog_links(const size_t blogs_c, const BlogPost *const posts) {
     dbg("Updating blog links...\n", "");
     HtmlFile file = InitHtmlFile();
     strcpy(file.name, "blog");
-    strcpy(file.path, "./");
+    strcpy(file.path, "./blogs");
 
     file.content_c += html_template(file.content, file.name);
+    html_elm(file.content[file.content_c++], "a", " href=\"../index.html\"", "Home");
     for (size_t i = 0; i < blogs_c; i++) {
-        strcpy(file.content[file.content_c++], "<div class=\"blog-post>\"");
+        strcpy(file.content[file.content_c++], "<div class=\"blog-post\">");
         html_elm(file.content[file.content_c++], "h1", "", posts[i].title);
         html_elm(file.content[file.content_c++], "p", "", posts[i].description);
 
         char blog_link[64];
-        sprintf(blog_link, " href=\"blogs/%s.html\"", posts[i].name);
+        sprintf(blog_link, " href=\"%s.html\"", posts[i].name);
 
         html_elm(file.content[file.content_c++], "a", blog_link, "Read");
         strcpy(file.content[file.content_c++], "</div>");
     }
 
+    strcpy(file.content[file.content_c++], "</main>");
     strcpy(file.content[file.content_c++], "</body>");
     strcpy(file.content[file.content_c++], "</html>");
 
