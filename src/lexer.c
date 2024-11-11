@@ -95,6 +95,10 @@ size_t lex(const char *path, Token *tokens) {
     size_t tokens_c = 0;
     while (fgets(buff, sizeof(buff), fp)) {
         buff[strcspn(buff, "\r\n")] = 0;
+        if (strcmp(buff, "@") == 0) {
+            return 0;
+        }
+
         tokenize(buff, &tokens_c, tokens);
     }
 

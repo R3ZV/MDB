@@ -52,6 +52,9 @@ void generate_blogs() {
 
         Token tokens[256];
         size_t tokens_c = lex(article_path, tokens);
+        if (tokens_c == 0) {
+            continue;
+        }
 
         dbg("Got %zu tokens:\n", tokens_c);
         for (size_t token = 0; token < tokens_c; token++) {

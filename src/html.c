@@ -152,7 +152,9 @@ BlogPost parse_into_html(const size_t tokens_c, const Token *const tokens, const
     strcpy(post.name, f_name);
 
     file.content_c += html_template(file.content, file.name);
-    html_elm(file.content[file.content_c++], "a", " href=\"./blog.html\"", "<- Back");
+
+    html_elm(file.content[file.content_c++], "a", " href=\"./blog.html\"", "&larr; Back");
+    strcpy(file.content[file.content_c++], "<div class=\"post-content\">");
 
     char content_buffer[1024];
     memset(content_buffer, 0, 1024);
@@ -210,6 +212,7 @@ BlogPost parse_into_html(const size_t tokens_c, const Token *const tokens, const
                 break;
         }
     }
+    strcpy(file.content[file.content_c++], "</div>");
     strcpy(file.content[file.content_c++], "</main>");
     strcpy(file.content[file.content_c++], "</body>");
     strcpy(file.content[file.content_c++], "</html>");
